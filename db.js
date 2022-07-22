@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 // mongodb://localhost:27017/soccer-new
 const connect = () => {
@@ -15,4 +15,4 @@ const connect = () => {
     });
 };
 
-export default connect;
+module.exports = connect;

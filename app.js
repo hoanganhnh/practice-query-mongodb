@@ -1,7 +1,9 @@
-import express from "express";
-import mongoose from "mongoose";
+const express = require("express");
+const mongoose = require("mongoose");
 
-import connect from "./db.js";
+const connect = require("./db");
+
+var ObjectId = require("mongodb").ObjectId;
 
 // init app & middleware
 const app = express();
@@ -26,6 +28,14 @@ app.get("/", async (req, res) => {
           lastName: "Dang",
         },
       },
+      {
+        $lookup: {
+          from: "teams",
+          localField: "teams",
+          foreignField: "_id",
+          as: "player-team",
+        },
+      },
     ])
     .toArray();
 
@@ -34,32 +44,45 @@ app.get("/", async (req, res) => {
     data: users,
   });
 });
+/**
+ * @see https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#lookup-multiple-joins
+ */
+app.get("/club_private_signup_links", async (req, res) => {
+  const collection = mongoose.connection.db.collection(
+    "club_private_signup_links"
+  );
 
-app.get("/posts/:id", (req, res) => {
-  if (ObjectId.isValid(req.params.id)) {
-    db.collection("posts")
-      .findOne({ _id: new ObjectId(req.params.id) })
-      .then((doc) => {
-        res.status(200).json(doc);
-      })
-      .catch((err) => {
-        res.status(500).json({ error: "Could not fetch the document" });
-      });
-  } else {
-    res.status(500).json({ error: "Could not fetch the document" });
-  }
-});
-
-app.post("/posts", (req, res) => {
-  const newBook = req.body;
-  db.collection("posts")
-    .insertOne(newBook)
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((err) => {
-      res.status(500).json({ err: "Could not create a new doc" });
-    });
+  const club_private_signup_links = await collection
+    .aggregate([
+      {
+        $match: {
+          uuid: "266be2f4-014f-4c77-becc-0f7f24f56f69",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+          pipeline: [{ $project: { firstName: 1, lastName: 1 } }],
+        },
+      },
+      {
+        $lookup: {
+          from: "clubs",
+          localField: "club",
+          foreignField: "_id",
+          as: "club",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+    ])
+    .toArray();
+  res.status(200).json({
+    // results: club_private_signup_links.length,
+    data: club_private_signup_links,
+  });
 });
 
 app.listen(PORT, () => {
