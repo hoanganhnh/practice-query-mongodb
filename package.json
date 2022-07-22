@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon --inspect app.js",
+    "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nguyen Van Sang",
@@ -15,8 +15,10 @@
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "mogoose": "^0.0.1-security",
     "mongodb": "^4.8.0",
     "mongoose": "^6.4.5",
     "nodemon": "^2.0.19"
   }
 }
+

@@ -1,19 +1,18 @@
-import { MongoClient } from 'mongodb'
+import mongoose from "mongoose";
 
-let dbConnection
+// mongodb://localhost:27017/soccer-new
+const connect = () => {
+  mongoose
+    .connect("mongodb://localhost:27017/soccer-new", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+    .then(() => {
+      console.log("Connect to DB successfull !");
+    })
+    .catch((err) => {
+      console.error("Connect to DB failed !", err);
+    });
+};
 
-const connectDB =  {
-  connectToDb: (cb) => {
-    MongoClient.connect('mongodb://localhost:27017/PMS')
-      .then(client => {
-        dbConnection = client.db()
-        return cb()
-      })
-      .catch(err => {
-        console.log(err)
-        return cb(err)
-      })
-  },
-  getDb: () => dbConnection
-}
-export {connectDB}
+export default connect;
