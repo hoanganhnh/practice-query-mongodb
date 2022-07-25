@@ -1,17 +1,19 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv"
 
-// mongodb://localhost:27017/soccer-new
+dotenv.config()
+
 const connect = () => {
   mongoose
-    .connect("mongodb://localhost:27017/soccer-new", {
+    .connect(process.env.MONGODB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
     .then(() => {
-      console.log("Connect to DB successfull !");
+      console.log("Connect to DB successfully!");
     })
     .catch((err) => {
-      console.error("Connect to DB failed !", err);
+      console.error("Connect to DB failed!", err);
     });
 };
 
