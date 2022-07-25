@@ -1,9 +1,8 @@
 const mongoose = require("mongoose");
 
-// mongodb://localhost:27017/soccer-new
 const connect = () => {
   mongoose
-    .connect("mongodb://localhost:27017/soccer-new", {
+    .connect("mongodb://localhost:27017/soccer", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     })
