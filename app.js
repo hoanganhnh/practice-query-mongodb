@@ -10,6 +10,7 @@ const seasonModel = require("./models/season.model");
 const fixtureModel = require("./models/fixture.model");
 const submissionnEventModel = require("./models/submissionevent.model");
 const playerModel = require("./models/player.model");
+const teamModel = require("./models/team.model");
 
 const app = express();
 
@@ -188,6 +189,122 @@ app.get("/clubs", async (req, res) => {
   res.status(200).json({
     result: clubs.length,
     data: clubs,
+  });
+});
+// find age player gt 15
+app.use("/age-player", async (req, res) => {
+  const players = await playerModel.aggregate([
+    {
+      $addFields: {
+        age: {
+          $dateDiff: { startDate: "$dob", endDate: "$$NOW", unit: "year" },
+        },
+      },
+    },
+    {
+      $project: {
+        age: 1,
+        firstName: 1,
+        lastName: 1,
+        dob: 1,
+      },
+    },
+    {
+      $match: {
+        age: {
+          $gt: 15,
+        },
+      },
+    },
+    {
+      $sort: { age: -1 },
+    },
+  ]);
+
+  res.status(200).json({
+    result: players.length,
+    data: players,
+  });
+});
+// find name team  gruop by name club
+app.use("/team-club-gruop", async (req, res) => {
+  try {
+    const teams = await teamModel.aggregate([
+      {
+        $lookup: {
+          from: "clubs",
+          localField: "club",
+          foreignField: "_id",
+          as: "club",
+          pipeline: [{ $project: { name: 1 } }],
+        },
+      },
+      { $unwind: "$club" },
+      {
+        $group: {
+          _id: "$club.name",
+          count: {
+            $sum: 1,
+          },
+          name_clubs: {
+            $addToSet: "$name",
+          },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+    ]);
+
+    // const result = await clubModel
+    //   .find()
+    //   .populate({
+    //     path: "teams",
+    //     select: "name -_id",
+    //   })
+    //   .select("name");
+
+    res.status(200).json({
+      result: teams.length,
+      data: teams,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+// find team by name club
+app.use("/team-club", async (req, res) => {
+  const teams = await teamModel.aggregate([
+    {
+      $lookup: {
+        from: "clubs",
+        localField: "club",
+        foreignField: "_id",
+        as: "club",
+        pipeline: [{ $project: { name: 1 } }],
+      },
+    },
+
+    { $unwind: "$club" },
+    {
+      $match: {
+        "club.name": "North Shore United",
+      },
+    },
+  ]);
+
+  /* const name_teams = await clubModel
+    .find({ name: "North Shore United" })
+    .populate({
+      path: "teams",
+      select: "name",
+    }); */
+
+  res.status(200).json({
+    result: teams.length,
+    data: teams,
   });
 });
 
